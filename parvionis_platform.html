@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PARVIONIS - Every Problem, One Solution</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        },
+                        accent: {
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Custom CSS Styles -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Glassmorphism utility classes */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .dark .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.6);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .dark .glass-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+        }
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.5);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(107, 114, 128, 0.8);
+        }
+
+        /* Canvas element overlay */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.05); }
+        }
+        .glow-effect {
+            animation: pulseGlow 6s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col relative overflow-x-hidden">
+
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Splash Screen Boot Animation -->
+    <div id="splash-screen" class="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center transition-opacity duration-700">
+        <div class="relative flex items-center justify-center mb-6">
+            <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-brand-500 to-accent-500 blur-xl opacity-60 animate-pulse"></div>
+            <div class="absolute w-20 h-20 rounded-2xl bg-slate-900 border border-brand-500/50 flex items-center justify-center shadow-2xl">
+                <i data-lucide="sparkles" class="w-10 h-10 text-brand-400 animate-bounce"></i>
+            </div>
+        </div>
+        <h1 class="text-3xl font-extrabold tracking-wider text-white mb-2">PARVIONIS</h1>
+        <p class="text-brand-400 font-medium text-sm tracking-wide bg-brand-950/80 px-4 py-1.5 rounded-full border border-brand-500/30">
+            Every Problem, One Solution
+        </p>
+        <div class="mt-8 w-48 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div class="w-full h-full bg-gradient-to-r from-brand-500 to-accent-400 animate-[pulse_1.5s_infinite]"></div>
+        </div>
+    </div>
+
+    <!-- MAIN APP WRAPPER -->
+    <div id="app-wrapper" class="relative z-10 flex-1 flex flex-col min-h-screen opacity-0 transition-opacity duration-500">
+
+        <header class="sticky top-0 z-40 glass-panel border-b border-slate-200 dark:border-slate-800/80">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                
+                <!-- Logo & Tagline Badge -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('landing')">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-500 to-accent-500 flex items-center justify-center text-white shadow-lg shadow-brand-500/20">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">PARVIONIS</span>
+                            <span class="hidden sm:inline-block text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/20">AI Assistant</span>
+                        </div>
+                        <p class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 leading-none">Every Problem, One Solution</p>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden md:flex items-center space-x-1">
+                    <button onclick="switchTab('landing')" id="nav-landing" class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2 hover:bg-slate-200/50 dark:hover:bg-slate-800/50">
+                        <i data-lucide="home" class="w-4 h-4"></i>
+                        <span>Home</span>
+                    </button>
+                    <button onclick="switchTab('solver')" id="nav-solver" class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2 hover:bg-slate-200/50 dark:hover:bg-slate-800/50">
+                        <i data-lucide="zap" class="w-4 h-4"></i>
+                        <span>Solve Anything</span>
+                    </button>
+                    <button onclick="switchTab('history')" id="nav-history" class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 relative">
+                        <i data-lucide="history" class="w-4 h-4"></i>
+                        <span>My History</span>
+                        <span id="history-badge" class="hidden ml-1 px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-brand-500 text-white">0</span>
+                    </button>
+                </nav>
+
+                <!-- Header Right Action Tools -->
+                <div class="flex items-center space-x-2">
+                    <button id="theme-toggle" onclick="toggleTheme()" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Toggle Theme">
+                        <i data-lucide="moon" id="theme-icon-dark" class="w-4 h-4 hidden dark:block"></i>
+                        <i data-lucide="sun" id="theme-icon-light" class="w-4 h-4 block dark:hidden"></i>
+                    </button>
+                    
+                    <button onclick="switchTab('solver')" class="hidden sm:flex items-center space-x-2 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-600 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-lg shadow-brand-500/20 active:scale-95 transition-all">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                        <span>New Problem</span>
+                    </button>
+
+                    <!-- Mobile Menu Toggle Button -->
+                    <button onclick="toggleMobileMenu()" class="md:hidden p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Navigation Menu -->
+            <div id="mobile-menu" class="hidden md:hidden border-t border-slate-200 dark:border-slate-800 px-4 py-3 space-y-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md">
+                <button onclick="switchTab('landing'); toggleMobileMenu();" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i data-lucide="home" class="w-5 h-5 text-brand-500"></i>
+                    <span>Home</span>
+                </button>
+                <button onclick="switchTab('solver'); toggleMobileMenu();" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i data-lucide="zap" class="w-5 h-5 text-amber-500"></i>
+                    <span>Solve Anything</span>
+                </button>
+                <button onclick="switchTab('history'); toggleMobileMenu();" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i data-lucide="history" class="w-5 h-5 text-accent-500"></i>
+                    <span>My History</span>
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col justify-center">
+
+            <!-- TAB 1: LANDING HERO VIEW -->
+            <section id="view-landing" class="space-y-12 my-auto">
+                
+                <!-- Hero Section -->
+                <div class="text-center max-w-3xl mx-auto space-y-6 pt-6">
+                    <div class="inline-flex items-center space-x-2 px-4 py-2 rounded-full glass-card border border-brand-500/30 text-brand-600 dark:text-brand-400 text-xs sm:text-sm font-bold shadow-sm">
+                        <i data-lucide="sparkles" class="w-4 h-4 animate-spin text-brand-500"></i>
+                        <span>AI Problem Solver for Everyone</span>
+                    </div>
+
+                    <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
+                        Every Problem, <br class="hidden sm:inline">
+                        <span class="bg-gradient-to-r from-brand-500 via-accent-500 to-brand-400 bg-clip-text text-transparent">One Simple Solution.</span>
+                    </h1>
+
+                    <p class="text-lg sm:text-xl text-slate-600 dark:text-slate-300 leading-relaxed font-normal max-w-2xl mx-auto">
+                        Family arguments, school homework, mess in your room, friendship drama, business queries, or personal confusion—tell PARVIONIS what’s wrong, and get simple, friendly, 100% step-by-step guidance!
+                    </p>
+
+                    <!-- Main Call-to-action button -->
+                    <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <button onclick="switchTab('solver')" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-600 text-white font-bold text-lg shadow-xl shadow-brand-500/30 hover:shadow-brand-500/50 hover:scale-105 active:scale-95 transition-all flex items-center justify-center space-x-3">
+                            <i data-lucide="zap" class="w-6 h-6 fill-current"></i>
+                            <span>Solve My Problem Now</span>
+                        </button>
+                        <button onclick="switchTab('history')" class="w-full sm:w-auto px-6 py-4 rounded-2xl glass-card text-slate-700 dark:text-slate-200 font-semibold text-base hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-all flex items-center justify-center space-x-2">
+                            <i data-lucide="bookmark" class="w-5 h-5 text-accent-500"></i>
+                            <span>View Saved Solutions</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <h2 class="text-xl font-bold text-slate-900 dark:text-white">What can PARVIONIS help you with today?</h2>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Select any topic below or describe anything you want!</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+                        
+                        <div onclick="selectCategoryAndSolve('Family & Household')" class="glass-card p-4 rounded-2xl text-center cursor-pointer hover:border-brand-500 transition-all group">
+                            <div class="w-12 h-12 mx-auto rounded-xl bg-pink-500/10 dark:bg-pink-500/20 text-pink-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                <i data-lucide="users" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="font-bold text-xs text-slate-800 dark:text-slate-200">Family & Relatives</h3>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Arguments, chores, understanding parents</p>
+                        </div>
+
+                        <div onclick="selectCategoryAndSolve('Friends & Social')" class="glass-card p-4 rounded-2xl text-center cursor-pointer hover:border-brand-500 transition-all group">
+                            <div class="w-12 h-12 mx-auto rounded-xl bg-purple-500/10 dark:bg-purple-500/20 text-purple-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                <i data-lucide="heart-handshake" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="font-bold text-xs text-slate-800 dark:text-slate-200">Friends & Relationships</h3>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Fights, peer pressure, making friends</p>
+                        </div>
+
+                        <div onclick="selectCategoryAndSolve('School & Learning')" class="glass-card p-4 rounded-2xl text-center cursor-pointer hover:border-brand-500 transition-all group">
+                            <div class="w-12 h-12 mx-auto rounded-xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                <i data-lucide="book-open" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="font-bold text-xs text-slate-800 dark:text-slate-200">School & Exams</h3>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Hard subjects, homework, study plans</p>
+                        </div>
+
+                        <div onclick="selectCategoryAndSolve('Room & Everyday Chores')" class="glass-card p-4 rounded-2xl text-center cursor-pointer hover:border-brand-500 transition-all group">
+                            <div class="w-12 h-12 mx-auto rounded-xl bg-cyan-500/10 dark:bg-cyan-500/20 text-cyan-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                <i data-lucide="sparkles" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="font-bold text-xs text-slate-800 dark:text-slate-200">Room & Cleanliness</h3>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Messy desk, organizing, daily routine</p>
+                        </div>
+
+                        <div onclick="selectCategoryAndSolve('Mind & Feelings')" class="glass-card p-4 rounded-2xl text-center cursor-pointer hover:border-brand-500 transition-all group">
+                            <div class="w-12 h-12 mx-auto rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                <i data-lucide="smile" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="font-bold text-xs text-slate-800 dark:text-slate-200">Mind & Feelings</h3>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Feeling stressed, nervous, lazy, or upset</p>
+                        </div>
+
+                        <div onclick="selectCategoryAndSolve('Money & Ideas')" class="glass-card p-4 rounded-2xl text-center cursor-pointer hover:border-brand-500 transition-all group">
+                            <div class="w-12 h-12 mx-auto rounded-xl bg-emerald-600/10 dark:bg-emerald-600/20 text-emerald-400 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                <i data-lucide="coins" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="font-bold text-xs text-slate-800 dark:text-slate-200">Money & Work</h3>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Pocket money, side projects, savings</p>
+                        </div>
+
+                        <div onclick="selectCategoryAndSolve('Tech & Gaming')" class="glass-card p-4 rounded-2xl text-center cursor-pointer hover:border-brand-500 transition-all group col-span-2 sm:col-span-1">
+                            <div class="w-12 h-12 mx-auto rounded-xl bg-blue-500/10 dark:bg-blue-500/20 text-blue-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                                <i data-lucide="gamepad-2" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="font-bold text-xs text-slate-800 dark:text-slate-200">Tech & Gadgets</h3>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">App glitches, settings, gaming setup</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Features Highlight Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+                    <div class="glass-card p-6 rounded-2xl space-y-3">
+                        <div class="w-10 h-10 rounded-lg bg-brand-500/20 text-brand-600 dark:text-brand-400 flex items-center justify-center">
+                            <i data-lucide="baby" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="font-bold text-base text-slate-900 dark:text-white">10-Year-Old Simple Language</h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                            No complicated words or confusing jargon! Everything is explained using simple analogies, friendly advice, and easy bullet points.
+                        </p>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl space-y-3">
+                        <div class="w-10 h-10 rounded-lg bg-accent-500/20 text-accent-600 dark:text-accent-400 flex items-center justify-center">
+                            <i data-lucide="list-checks" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="font-bold text-base text-slate-900 dark:text-white">Step-By-Step Action Plans</h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                            Get clear "What to do first, second, and third" instructions so you are never left guessing what to do next.
+                        </p>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl space-y-3">
+                        <div class="w-10 h-10 rounded-lg bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+                            <i data-lucide="messages-square" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="font-bold text-base text-slate-900 dark:text-white">Interactive Live Chat</h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                            Got a follow-up question? Chat directly on your problem to ask "what if?", request simpler terms, or discuss each step!
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-solver" class="hidden space-y-6">
+                
+                <!-- Main Header for Solver -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="px-2.5 py-1 rounded-md bg-brand-500/10 text-brand-600 dark:text-brand-400 font-bold text-xs uppercase tracking-wider">Universal AI Solver</span>
+                        </div>
+                        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1">Describe Your Problem</h1>
+                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">PARVIONIS will break it down into super clear, easy steps.</p>
+                    </div>
+                    
+                    <button onclick="clearSolverInput()" class="text-xs px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center space-x-1.5">
+                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                        <span>Reset Form</span>
+                    </button>
+                </div>
+
+                <!-- Input Glass Panel -->
+                <div class="glass-panel p-6 rounded-3xl shadow-xl space-y-5">
+                    
+                    <!-- Category Selector -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Category / Topic</label>
+                        <select id="problem-category" class="w-full px-4 py-3 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none text-sm transition-all">
+                            <option value="General & Everyday Life">🌟 General & Everyday Life</option>
+                            <option value="Family & Relatives">👨‍👩‍👧‍👦 Family, Parents & Siblings</option>
+                            <option value="Friends & Social">🤝 Friends, Besties & Social Drama</option>
+                            <option value="School & Homework">📚 School, Homework & Exams</option>
+                            <option value="Room & Chores">🧹 Room Cleaning & Chores</option>
+                            <option value="Mind & Feelings">🧠 Emotions, Stress & Motivation</option>
+                            <option value="Money & Business">💰 Pocket Money, Savings & Business</option>
+                            <option value="Tech & Devices">💻 Phones, Computers & Games</option>
+                        </select>
+                    </div>
+
+                    <!-- Problem Input Textarea -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">What problem are you facing?</label>
+                            <span class="text-[11px] text-slate-400 dark:text-slate-500 font-mono" id="char-counter">0 / 2000</span>
+                        </div>
+                        <textarea id="problem-input" rows="5" maxlength="2000" oninput="updateCharCounter()" placeholder="Example: My younger brother keeps taking my stuff without asking and we keep fighting. Or: I have a huge history test tomorrow and I haven't started studying yet..." class="w-full p-4 rounded-2xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-normal text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all resize-y placeholder:text-slate-400 dark:placeholder:text-slate-500"></textarea>
+                    </div>
+
+                    <!-- Fast Quick Preset Prompts -->
+                    <div>
+                        <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block mb-2">Or click a sample situation to try:</span>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="fillPreset('My parents are angry because my bedroom is super messy.')" class="text-xs px-3 py-1.5 rounded-full glass-card hover:border-brand-500 text-slate-700 dark:text-slate-300">
+                                🧹 Messy Room
+                            </button>
+                            <button onclick="fillPreset('I had a fight with my best friend and now they are ignoring my messages.')" class="text-xs px-3 py-1.5 rounded-full glass-card hover:border-brand-500 text-slate-700 dark:text-slate-300">
+                                💔 Fight with Bestie
+                            </button>
+                            <button onclick="fillPreset('I have an exam in two days and I feel overwhelmed and unfocused.')" class="text-xs px-3 py-1.5 rounded-full glass-card hover:border-brand-500 text-slate-700 dark:text-slate-300">
+                                📖 Exam Stress
+                            </button>
+                            <button onclick="fillPreset('I want to earn a little extra allowance/money by doing small tasks.')" class="text-xs px-3 py-1.5 rounded-full glass-card hover:border-brand-500 text-slate-700 dark:text-slate-300">
+                                🪙 Pocket Money
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="pt-2">
+                        <button id="solve-btn" onclick="generateSolution()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500 hover:from-brand-500 hover:to-accent-600 text-white font-bold text-base shadow-xl shadow-brand-500/25 hover:shadow-brand-500/40 active:scale-[0.99] transition-all flex items-center justify-center space-x-2">
+                            <i data-lucide="sparkles" class="w-5 h-5"></i>
+                            <span>Get Simple & Detailed Solution</span>
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- Loading State Container -->
+                <div id="loading-container" class="hidden glass-panel p-8 rounded-3xl text-center space-y-4">
+                    <div class="relative w-16 h-16 mx-auto">
+                        <div class="w-16 h-16 rounded-full border-4 border-brand-500/20 border-t-brand-500 animate-spin"></div>
+                        <i data-lucide="brain" class="w-6 h-6 text-brand-500 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></i>
+                    </div>
+                    <div class="space-y-1">
+                        <h3 class="font-bold text-lg text-slate-900 dark:text-white" id="loading-text">Analyzing your problem...</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">PARVIONIS is crafting a easy-to-understand step-by-step masterplan...</p>
+                    </div>
+                </div>
+
+                <div id="result-container" class="hidden glass-panel p-6 sm:p-8 rounded-3xl space-y-6 shadow-2xl border-brand-500/30">
+                    
+                    <!-- Header with Tabs: Solution vs Interactive Chat -->
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4 gap-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-brand-500/20 text-brand-600 dark:text-brand-400 flex items-center justify-center font-bold">
+                                <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400" id="res-category">GENERAL</span>
+                                <h2 class="text-xl font-extrabold text-slate-900 dark:text-white" id="res-title">Solution Ready</h2>
+                            </div>
+                        </div>
+
+                        <!-- Solution Navigation Mode Toggle -->
+                        <div class="flex items-center bg-slate-200/80 dark:bg-slate-800/80 p-1 rounded-xl w-full sm:w-auto">
+                            <button id="tab-btn-solution" onclick="switchResultSubTab('solution')" class="flex-1 sm:flex-initial px-4 py-2 rounded-lg text-xs font-bold transition-all bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm flex items-center justify-center space-x-1.5">
+                                <i data-lucide="file-text" class="w-4 h-4"></i>
+                                <span>Master Plan</span>
+                            </button>
+                            <button id="tab-btn-chat" onclick="switchResultSubTab('chat')" class="flex-1 sm:flex-initial px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center space-x-1.5">
+                                <i data-lucide="message-square" class="w-4 h-4"></i>
+                                <span>💬 Chat & Refine</span>
+                                <span id="chat-count-badge" class="ml-1 px-1.5 py-0.2 text-[9px] bg-brand-500 text-white rounded-full">New</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- SUB-TAB 1: FORMATTED SOLUTION DISPLAY -->
+                    <div id="subtab-solution" class="space-y-6">
+                        
+                        <!-- Original Query Banner -->
+                        <div class="p-4 rounded-xl bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                            <span class="font-bold text-slate-900 dark:text-white block mb-1">Your Problem:</span>
+                            <p id="res-query-text" class="italic"></p>
+                        </div>
+
+                        <!-- Generated Structured Content Container -->
+                        <div id="res-content-body" class="prose dark:prose-invert max-w-none text-slate-800 dark:text-slate-200 text-sm sm:text-base space-y-4">
+                            <!-- Injected dynamically -->
+                        </div>
+
+                        <!-- Action Toolbar -->
+                        <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                            <div class="flex items-center space-x-2">
+                                <button onclick="copySolutionToClipboard()" class="px-4 py-2 rounded-xl glass-card text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center space-x-1.5">
+                                    <i data-lucide="copy" class="w-4 h-4"></i>
+                                    <span>Copy Plan</span>
+                                </button>
+                                <button onclick="saveCurrentToHistory()" id="save-btn" class="px-4 py-2 rounded-xl bg-brand-500/20 text-brand-600 dark:text-brand-400 text-xs font-semibold hover:bg-brand-500/30 flex items-center space-x-1.5">
+                                    <i data-lucide="bookmark-plus" class="w-4 h-4"></i>
+                                    <span id="save-btn-text">Save to History</span>
+                                </button>
+                            </div>
+
+                            <button onclick="switchResultSubTab('chat')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-accent-500 to-accent-600 text-white text-xs font-bold shadow-md hover:shadow-lg flex items-center space-x-2">
+                                <span>Have follow-up questions? Chat now</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- SUB-TAB 2: INTERACTIVE FOLLOW-UP CHAT -->
+                    <div id="subtab-chat" class="hidden space-y-4">
+                        <div class="bg-brand-500/10 border border-brand-500/20 p-3 rounded-xl text-xs text-brand-700 dark:text-brand-300 flex items-center space-x-2">
+                            <i data-lucide="info" class="w-4 h-4 flex-shrink-0"></i>
+                            <span>You can ask anything! e.g., "Can you make step 2 easier?", "What if my friend says no?", or "Give me an example."</span>
+                        </div>
+
+                        <!-- Chat Messages Container -->
+                        <div id="chat-messages-box" class="h-80 overflow-y-auto p-4 rounded-2xl bg-slate-100/60 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3">
+                            <!-- Messages rendered here dynamically -->
+                        </div>
+
+                        <!-- Chat Input Box -->
+                        <div class="flex items-center space-x-2">
+                            <input type="text" id="chat-user-input" onkeypress="handleChatKeyPress(event)" placeholder="Ask PARVIONIS a follow-up question..." class="flex-1 px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            
+                            <button onclick="sendChatMessage()" id="chat-send-btn" class="px-5 py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold text-xs shadow-md transition-all flex items-center space-x-1.5">
+                                <span>Send</span>
+                                <i data-lucide="send" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <section id="view-history" class="hidden space-y-6">
+                
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">Saved Solutions History</h1>
+                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">All your saved answers stored right in your browser.</p>
+                    </div>
+
+                    <button onclick="clearAllHistory()" class="px-3 py-1.5 rounded-lg border border-red-300 dark:border-red-900/50 text-red-600 dark:text-red-400 text-xs font-semibold hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center space-x-1">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        <span>Clear All</span>
+                    </button>
+                </div>
+
+                <!-- Empty State -->
+                <div id="history-empty" class="glass-panel p-12 rounded-3xl text-center space-y-4">
+                    <div class="w-16 h-16 mx-auto rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+                        <i data-lucide="bookmark-x" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">No Saved Solutions Yet</h3>
+                    <p class="text-xs text-slate-500 max-w-md mx-auto">Whenever you generate a solution for a problem, click "Save to History" to access it here anytime.</p>
+                    <button onclick="switchTab('solver')" class="px-5 py-2.5 rounded-xl bg-brand-500 text-white text-xs font-bold shadow-md hover:bg-brand-600 transition-all">
+                        Solve Your First Problem
+                    </button>
+                </div>
+
+                <!-- History List Container -->
+                <div id="history-list" class="grid grid-cols-1 gap-4">
+                    <!-- History cards injected dynamically -->
+                </div>
+
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-auto border-t border-slate-200 dark:border-slate-800/80 py-6 glass-panel z-10">
+            <div class="max-w-7xl mx-auto px-4 text-center space-y-2">
+                <p class="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    PARVIONIS Platform &copy; 2026 &bull; <span class="text-brand-500">Every Problem, One Solution</span>
+                </p>
+                <p class="text-[11px] text-slate-400 dark:text-slate-500">
+                    Designed to break down life's big and small problems into simple, friendly, actionable steps.
+                </p>
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        const GEMINI_API_KEY = ""; // Dynamic runtime environment
+        
+        let currentTab = 'landing';
+        let currentResultSubTab = 'solution';
+        let currentProblemData = null; // Stores currently generated solution and chat history
+        let historyStore = [];
+
+        // System prompt specifying simple 10-year-old friendly language and detailed structure
+        const SYSTEM_PROMPT_SOLVER = `
+You are PARVIONIS, the friendliest and smartest AI problem solver in the world. 
+Your core motto is: "Every Problem, One Solution".
+
+CRITICAL INSTRUCTIONS FOR YOUR OUTPUT FORMAT & LANGUAGE:
+1. EXTREMELY EASY LANGUAGE: Write so clearly that a 10-year-old child can effortlessly understand every single sentence. Avoid complex vocabulary, legal jargon, or convoluted phrases.
+2. WARM, ENCOURAGING & FRIENDLY TONE: Use a friendly, supportive voice (like a wise best friend or caring elder sibling).
+3. DETAILED & STEP-BY-STEP: Don't give vague advice. Provide exact, actionable steps on what to do 1st, 2nd, and 3rd.
+4. STRUCTURE YOUR RESPONSE WITH THESE SPECIFIC HEADINGS (Use Markdown headers):
+   - ## 🌟 Quick Summary
+     (Explain the solution in 2 simple sentences with a comforting tone)
+   - ## 💡 Easy Analogy (Think of it like this!)
+     (Provide a fun real-world comparison to make the problem easy to visualize)
+   - ## 🎯 Step-By-Step Action Plan
+     (Provide 3 to 5 clear numbered steps. Each step must have a title and 1-2 bullet points on EXACTLY what to say or do)
+   - ## 🤫 Secret Pro-Tip
+     (One cool trick or mind trick to make it 10x easier)
+   - ## 💬 What to Say or Do (Example)
+     (Give an exact script or example if it involves talking to family, friends, or teachers)
+`;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // Initialize Lucide icons
+            lucide.createIcons();
+            
+            // Setup canvas animation
+            initCanvasBackground();
+
+            // Load Saved History from localStorage
+            loadHistoryFromStorage();
+
+            // Dismiss Splash Screen after animation
+            setTimeout(() => {
+                const splash = document.getElementById('splash-screen');
+                const app = document.getElementById('app-wrapper');
+                if (splash && app) {
+                    splash.classList.add('opacity-0', 'pointer-events-none');
+                    app.classList.remove('opacity-0');
+                    setTimeout(() => splash.remove(), 700);
+                }
+            }, 1200);
+        });
+
+        // Toggle Theme (Light / Dark Mode)
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('parvionis_theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('parvionis_theme', 'dark');
+            }
+        }
+
+        // Apply theme from storage if set
+        if (localStorage.getItem('parvionis_theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            currentTab = tabId;
+            ['landing', 'solver', 'history'].forEach(id => {
+                const view = document.getElementById(`view-${id}`);
+                const nav = document.getElementById(`nav-${id}`);
+                if (view) {
+                    if (id === tabId) {
+                        view.classList.remove('hidden');
+                    } else {
+                        view.classList.add('hidden');
+                    }
+                }
+                if (nav) {
+                    if (id === tabId) {
+                        nav.classList.add('bg-brand-500/10', 'text-brand-600', 'dark:text-brand-400', 'font-bold');
+                    } else {
+                        nav.classList.remove('bg-brand-500/10', 'text-brand-600', 'dark:text-brand-400', 'font-bold');
+                    }
+                }
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            if (menu) menu.classList.toggle('hidden');
+        }
+
+        function updateCharCounter() {
+            const input = document.getElementById('problem-input');
+            const counter = document.getElementById('char-counter');
+            if (input && counter) {
+                counter.innerText = `${input.value.length} / 2000`;
+            }
+        }
+
+        function fillPreset(text) {
+            const input = document.getElementById('problem-input');
+            if (input) {
+                input.value = text;
+                updateCharCounter();
+                input.focus();
+            }
+        }
+
+        function clearSolverInput() {
+            const input = document.getElementById('problem-input');
+            if (input) input.value = '';
+            updateCharCounter();
+            document.getElementById('result-container').classList.add('hidden');
+        }
+
+        function selectCategoryAndSolve(categoryName) {
+            switchTab('solver');
+            const select = document.getElementById('problem-category');
+            if (select) {
+                for (let i = 0; i < select.options.length; i++) {
+                    if (select.options[i].value.includes(categoryName) || select.options[i].text.includes(categoryName)) {
+                        select.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+            const input = document.getElementById('problem-input');
+            if (input) input.focus();
+        }
+
+        async function generateSolution() {
+            const categoryEl = document.getElementById('problem-category');
+            const inputEl = document.getElementById('problem-input');
+            const category = categoryEl ? categoryEl.value : 'General';
+            const problemText = inputEl ? inputEl.value.trim() : '';
+
+            if (!problemText) {
+                showToast('Please type in your problem first!');
+                return;
+            }
+
+            // Show Loading State
+            const loadingBox = document.getElementById('loading-container');
+            const resultBox = document.getElementById('result-container');
+            const solveBtn = document.getElementById('solve-btn');
+
+            loadingBox.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+            solveBtn.disabled = true;
+            solveBtn.classList.add('opacity-50');
+
+            try {
+                const userPrompt = `Category: ${category}\nProblem: ${problemText}\n\nPlease generate a detailed, 10-year-old easy to understand solution following all formatting rules.`;
+
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${GEMINI_API_KEY}`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: userPrompt }] }],
+                        systemInstruction: { parts: [{ text: SYSTEM_PROMPT_SOLVER }] }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API Request failed with status ${response.status}`);
+                }
+
+                const data = await response.json();
+                const rawMarkdown = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a solution right now. Please try again.";
+
+                // Save into state object
+                currentProblemData = {
+                    id: Date.now().toString(),
+                    timestamp: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                    category: category,
+                    query: problemText,
+                    solutionMarkdown: rawMarkdown,
+                    chatHistory: [
+                        { role: 'model', text: 'Hello! I have created your full solution plan. Feel free to ask me any questions or ask me to explain any step in more detail!' }
+                    ]
+                };
+
+                // Render Result
+                renderSolutionResult(currentProblemData);
+
+            } catch (err) {
+                console.error("Gemini API Error:", err);
+                showToast("Connection issue. Please check your network and try again.");
+            } finally {
+                loadingBox.classList.add('hidden');
+                solveBtn.disabled = false;
+                solveBtn.classList.remove('opacity-50');
+            }
+        }
+
+        function renderSolutionResult(data) {
+            const resultBox = document.getElementById('result-container');
+            const categoryBadge = document.getElementById('res-category');
+            const queryText = document.getElementById('res-query-text');
+            const contentBody = document.getElementById('res-content-body');
+            const saveBtnText = document.getElementById('save-btn-text');
+
+            categoryBadge.innerText = data.category.toUpperCase();
+            queryText.innerText = `"${data.query}"`;
+            
+            // Format Markdown to clean HTML
+            contentBody.innerHTML = formatMarkdownToHTML(data.solutionMarkdown);
+
+            // Reset Save Button UI
+            saveBtnText.innerText = "Save to History";
+
+            // Render initial chat state
+            renderChatMessages();
+
+            // Show result view and switch to master plan tab
+            resultBox.classList.remove('hidden');
+            switchResultSubTab('solution');
+            
+            // Scroll result into view
+            resultBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // Re-bind Lucide icons
+            lucide.createIcons();
+        }
+
+        // Simple Markdown to HTML formatter with styled cards
+        function formatMarkdownToHTML(md) {
+            let html = md
+                .replace(/^## (.*$)/gim, '<h2 class="text-lg sm:text-xl font-extrabold text-brand-600 dark:text-brand-400 mt-6 mb-3 flex items-center space-x-2"><span class="bg-brand-500/10 p-1 rounded-lg">$1</span></h2>')
+                .replace(/^### (.*$)/gim, '<h3 class="text-base font-bold text-slate-900 dark:text-white mt-4 mb-2">$1</h3>')
+                .replace(/^\* (.*$)/gim, '<li class="ml-4 list-disc text-slate-700 dark:text-slate-300 py-0.5">$1</li>')
+                .replace(/^- (.*$)/gim, '<li class="ml-4 list-disc text-slate-700 dark:text-slate-300 py-0.5">$1</li>')
+                .replace(/^\d+\.\s+(.*$)/gim, '<div class="glass-card p-4 rounded-xl border-l-4 border-l-brand-500 my-3 shadow-sm"><span class="font-bold text-slate-900 dark:text-white">$1</span></div>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-slate-900 dark:text-white">$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
+                .replace(/\n\n/g, '<div class="h-2"></div>');
+
+            return html;
+        }
+
+        // Switch sub-tabs (Solution Plan vs Interactive Chat)
+        function switchResultSubTab(subTab) {
+            currentResultSubTab = subTab;
+            const btnSol = document.getElementById('tab-btn-solution');
+            const btnChat = document.getElementById('tab-btn-chat');
+            const viewSol = document.getElementById('subtab-solution');
+            const viewChat = document.getElementById('subtab-chat');
+
+            if (subTab === 'solution') {
+                viewSol.classList.remove('hidden');
+                viewChat.classList.add('hidden');
+                btnSol.className = "flex-1 sm:flex-initial px-4 py-2 rounded-lg text-xs font-bold transition-all bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm flex items-center justify-center space-x-1.5";
+                btnChat.className = "flex-1 sm:flex-initial px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center space-x-1.5";
+            } else {
+                viewSol.classList.add('hidden');
+                viewChat.classList.remove('hidden');
+                btnChat.className = "flex-1 sm:flex-initial px-4 py-2 rounded-lg text-xs font-bold transition-all bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm flex items-center justify-center space-x-1.5";
+                btnSol.className = "flex-1 sm:flex-initial px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center space-x-1.5";
+                
+                // Focus chat input
+                setTimeout(() => {
+                    const chatInput = document.getElementById('chat-user-input');
+                    if (chatInput) chatInput.focus();
+                }, 100);
+            }
+        }
+
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        async function sendChatMessage() {
+            const inputEl = document.getElementById('chat-user-input');
+            const text = inputEl ? inputEl.value.trim() : '';
+
+            if (!text || !currentProblemData) return;
+
+            // Add user message to history
+            currentProblemData.chatHistory.push({ role: 'user', text: text });
+            inputEl.value = '';
+            renderChatMessages();
+
+            // Disable button during thinking
+            const sendBtn = document.getElementById('chat-send-btn');
+            sendBtn.disabled = true;
+
+            try {
+                // Construct multi-turn context
+                const contentsPayload = [
+                    {
+                        role: 'user',
+                        parts: [{ text: `Original Problem: ${currentProblemData.query}\nOriginal Solution context provided: ${currentProblemData.solutionMarkdown}` }]
+                    }
+                ];
+
+                currentProblemData.chatHistory.forEach(msg => {
+                    contentsPayload.push({
+                        role: msg.role === 'user' ? 'user' : 'model',
+                        parts: [{ text: msg.text }]
+                    });
+                });
+
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${GEMINI_API_KEY}`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: contentsPayload,
+                        systemInstruction: { parts: [{ text: "You are PARVIONIS Chat Assistant. Answer the user's follow-up questions about their problem in simple, friendly 10-year-old level English with practical examples." }] }
+                    })
+                });
+
+                const data = await response.json();
+                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "I'm right here! Could you explain that once more?";
+
+                currentProblemData.chatHistory.push({ role: 'model', text: reply });
+                renderChatMessages();
+
+            } catch (err) {
+                console.error("Chat error:", err);
+                currentProblemData.chatHistory.push({ role: 'model', text: "Oops, I had a tiny glitch! Could you ask that again?" });
+                renderChatMessages();
+            } finally {
+                sendBtn.disabled = false;
+            }
+        }
+
+        function renderChatMessages() {
+            const box = document.getElementById('chat-messages-box');
+            if (!box || !currentProblemData) return;
+
+            box.innerHTML = '';
+            currentProblemData.chatHistory.forEach(msg => {
+                const isUser = msg.role === 'user';
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `flex ${isUser ? 'justify-end' : 'justify-start'} mb-3`;
+                
+                msgDiv.innerHTML = `
+                    <div class="max-w-[85%] p-3.5 rounded-2xl text-xs sm:text-sm ${
+                        isUser 
+                            ? 'bg-gradient-to-r from-brand-600 to-brand-500 text-white rounded-br-none shadow-md' 
+                            : 'glass-card border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-bl-none shadow-sm'
+                    }">
+                        <div class="font-bold text-[10px] opacity-75 mb-1">${isUser ? 'You' : 'PARVIONIS AI'}</div>
+                        <div>${msg.text.replace(/\n/g, '<br>')}</div>
+                    </div>
+                `;
+                box.appendChild(msgDiv);
+            });
+
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function copySolutionToClipboard() {
+            if (!currentProblemData) return;
+            const textToCopy = `PARVIONIS SOLUTION PLAN\nProblem: ${currentProblemData.query}\n\n${currentProblemData.solutionMarkdown}`;
+            
+            const tempArea = document.createElement('textarea');
+            tempArea.value = textToCopy;
+            document.body.appendChild(tempArea);
+            tempArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempArea);
+
+            showToast("Solution copied to clipboard!");
+        }
+
+        function saveCurrentToHistory() {
+            if (!currentProblemData) return;
+
+            // Check if already saved
+            const existingIndex = historyStore.findIndex(item => item.id === currentProblemData.id);
+            if (existingIndex > -1) {
+                historyStore[existingIndex] = currentProblemData;
+            } else {
+                historyStore.unshift(currentProblemData);
+            }
+
+            saveHistoryToStorage();
+            
+            const saveBtnText = document.getElementById('save-btn-text');
+            if (saveBtnText) saveBtnText.innerText = "✓ Saved!";
+            showToast("Saved to your History!");
+        }
+
+        function saveHistoryToStorage() {
+            localStorage.setItem('parvionis_history', JSON.stringify(historyStore));
+            updateHistoryUI();
+        }
+
+        function loadHistoryFromStorage() {
+            const saved = localStorage.getItem('parvionis_history');
+            if (saved) {
+                try {
+                    historyStore = JSON.parse(saved);
+                } catch (e) {
+                    historyStore = [];
+                }
+            }
+            updateHistoryUI();
+        }
+
+        function updateHistoryUI() {
+            const listEl = document.getElementById('history-list');
+            const emptyEl = document.getElementById('history-empty');
+            const badgeEl = document.getElementById('history-badge');
+
+            if (badgeEl) {
+                if (historyStore.length > 0) {
+                    badgeEl.innerText = historyStore.length;
+                    badgeEl.classList.remove('hidden');
+                } else {
+                    badgeEl.classList.add('hidden');
+                }
+            }
+
+            if (!listEl || !emptyEl) return;
+
+            if (historyStore.length === 0) {
+                emptyEl.classList.remove('hidden');
+                listEl.classList.add('hidden');
+            } else {
+                emptyEl.classList.add('hidden');
+                listEl.classList.remove('hidden');
+                listEl.innerHTML = '';
+
+                historyStore.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = "glass-card p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-brand-500 transition-all";
+                    
+                    card.innerHTML = `
+                        <div class="space-y-1 flex-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-500/10 text-brand-600 dark:text-brand-400">${item.category}</span>
+                                <span class="text-[11px] text-slate-400">${item.timestamp}</span>
+                            </div>
+                            <h3 class="font-bold text-sm text-slate-900 dark:text-white line-clamp-1">"${item.query}"</h3>
+                        </div>
+                        <div class="flex items-center space-x-2 w-full sm:w-auto justify-end">
+                            <button onclick="loadHistoryItem('${item.id}')" class="px-3.5 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold transition-all flex items-center space-x-1">
+                                <span>Open</span>
+                                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button onclick="deleteHistoryItem('${item.id}')" class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-red-500 transition-colors">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    `;
+                    listEl.appendChild(card);
+                });
+                lucide.createIcons();
+            }
+        }
+
+        function loadHistoryItem(id) {
+            const item = historyStore.find(i => i.id === id);
+            if (item) {
+                currentProblemData = item;
+                switchTab('solver');
+                renderSolutionResult(item);
+            }
+        }
+
+        function deleteHistoryItem(id) {
+            historyStore = historyStore.filter(i => i.id !== id);
+            saveHistoryToStorage();
+            showToast("Item removed.");
+        }
+
+        function clearAllHistory() {
+            if (historyStore.length === 0) return;
+            historyStore = [];
+            saveHistoryToStorage();
+            showToast("History cleared.");
+        }
+
+        // Simple Toast Notification
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = "fixed bottom-6 right-6 z-50 glass-panel border border-brand-500 px-4 py-3 rounded-2xl shadow-2xl text-xs font-bold text-slate-900 dark:text-white flex items-center space-x-2 animate-bounce";
+            toast.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-brand-500"></i><span>${msg}</span>`;
+            document.body.appendChild(toast);
+            lucide.createIcons();
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function initCanvasBackground() {
+            const canvas = document.getElementById('bg-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            let width = (canvas.width = window.innerWidth);
+            let height = (canvas.height = window.innerHeight);
+
+            window.addEventListener('resize', () => {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            });
+
+            const particles = [];
+            const particleCount = Math.min(Math.floor(width / 25), 45);
+
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    vx: (Math.random() - 0.5) * 0.4,
+                    vy: (Math.random() - 0.5) * 0.4,
+                    radius: Math.random() * 2 + 1,
+                    alpha: Math.random() * 0.5 + 0.1
+                });
+            }
+
+            function animateCanvas() {
+                ctx.clearRect(0, 0, width, height);
+                const isDark = document.documentElement.classList.contains('dark');
+                const particleColor = isDark ? '255, 255, 255' : '34, 197, 94';
+
+                particles.forEach((p, i) => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    if (p.x < 0) p.x = width;
+                    if (p.x > width) p.x = 0;
+                    if (p.y < 0) p.y = height;
+                    if (p.y > height) p.y = 0;
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(${particleColor}, ${p.alpha * 0.4})`;
+                    ctx.fill();
+
+                    // Connect nearby particles with subtle line
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const p2 = particles[j];
+                        const dx = p.x - p2.x;
+                        const dy = p.y - p2.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist < 120) {
+                            ctx.beginPath();
+                            ctx.moveTo(p.x, p.y);
+                            ctx.lineTo(p2.x, p2.y);
+                            ctx.strokeStyle = `rgba(${particleColor}, ${(1 - dist / 120) * 0.08})`;
+                            ctx.lineWidth = 0.5;
+                            ctx.stroke();
+                        }
+                    }
+                });
+
+                requestAnimationFrame(animateCanvas);
+            }
+
+            animateCanvas();
+        }
+    </script>
+</body>
+</html>
